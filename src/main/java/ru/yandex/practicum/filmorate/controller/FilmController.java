@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exception.DoesNotExistException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import javax.validation.Valid;
@@ -14,18 +15,18 @@ import java.util.Map;
 
 @Slf4j
 @RestController
-@RequestMapping()
+@RequestMapping("/films")
 public class FilmController {
     private int id;
     private final Map<Integer, Film> films = new HashMap<>();
 
-    @GetMapping("/films")
+    @GetMapping()
     public List<Film> getAllFilms() {
         log.info("Запрос списка всех фильмов");
         return new ArrayList<>(films.values());
     }
 
-    @PostMapping(value = "/films")
+    @PostMapping()
     public Film addFilm(@Valid @RequestBody Film film) {
         id++;
         film.setId(id);
@@ -35,7 +36,7 @@ public class FilmController {
         return film;
     }
 
-    @PutMapping("/films")
+    @PutMapping()
     public Film updateFilm(@Valid @RequestBody Film film) {
         try {
             if (films.containsKey(film.getId())) {
