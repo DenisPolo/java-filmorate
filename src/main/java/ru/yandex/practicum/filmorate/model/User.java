@@ -8,11 +8,13 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
+import java.util.Set;
+import java.util.TreeSet;
 
 @Data
 @Builder
 public class User {
-    private int id;
+    private Integer id;
 
     @NotBlank(message = "Email не должен быть пустым")
     @Email(message = "Email не соответстует формату адреса электронной почты")
@@ -26,4 +28,20 @@ public class User {
 
     @Past(message = "День рождения не может быть в будущем")
     private LocalDate birthday;
+
+    private Set<Long> friends;
+
+    public boolean addFriend(Integer friendsId) {
+        if (friends == null) {
+            friends = new TreeSet<>();
+        }
+        return friends.add(friendsId.longValue());
+    }
+
+    public boolean removeFriend(Integer friendsId) {
+        if (friends == null) {
+            return false;
+        }
+        return friends.remove(friendsId.longValue());
+    }
 }

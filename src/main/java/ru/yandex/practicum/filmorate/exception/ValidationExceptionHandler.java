@@ -6,7 +6,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,10 +29,24 @@ public class ValidationExceptionHandler {
         return new ResponseError(defaultMessage, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(ResponseStatusException.class)
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseError runtimeExceptionHandle(RuntimeException e) {
+        log.warn(e.getMessage());
+        return new ResponseError(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({AlreadyExistsException.class, Exception.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseError responseStatusExceptionHandle(ResponseStatusException e) {
-        log.warn(e.getReason());
-        return new ResponseError(e.getReason(), HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseError alreadyExistsExceptionHandle(Exception e) {
+        log.warn(e.getMessage());
+        return new ResponseError(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseError notFoundExceptionHandle(NotFoundException e) {
+        log.warn(e.getMessage());
+        return new ResponseError(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 }
