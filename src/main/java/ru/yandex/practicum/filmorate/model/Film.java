@@ -14,8 +14,6 @@ import java.time.format.DateTimeFormatter;
 @Data
 @Builder
 public class Film {
-    public static final LocalDate START_RELEASE_DATE = LocalDate.of(1895, Month.DECEMBER, 28);
-    public static final DateTimeFormatter RELEASE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private int id;
 
     @NotBlank(message = "Имя не должно быть пустым")
