@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.service.ResponseDefault;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -50,7 +49,7 @@ public class FilmController {
 
     @DeleteMapping("/{filmId}/like/{userId}")
     public ResponseEntity removeLike(@PathVariable Integer filmId, @PathVariable Integer userId) {
-        return  ResponseEntity.ok(filmService.removeLike(filmId, userId));
+        return ResponseEntity.ok(filmService.removeLike(filmId, userId));
     }
 
     @GetMapping("/popular")
