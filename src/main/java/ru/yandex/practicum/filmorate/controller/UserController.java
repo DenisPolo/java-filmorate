@@ -1,10 +1,10 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.ResponseDefault;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
@@ -15,14 +15,10 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
     private final Map<Integer, User> users = new HashMap<>();
     private final UserService userService;
-
-    @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
 
     @GetMapping()
     public List<User> getAllUsers() {
@@ -45,8 +41,8 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseDefault deleteUser(@PathVariable Integer id) {
-        return userService.deleteUser(id);
+    public ResponseEntity deleteUser(@PathVariable Integer id) {
+        return ResponseEntity.ok(userService.deleteUser(id));
     }
 
     @GetMapping("/{id}/friends")
@@ -60,12 +56,12 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{otherId}")
-    public ResponseDefault addFriend(@PathVariable Integer id, @PathVariable Integer otherId) {
-        return userService.addFriend(id, otherId);
+    public ResponseEntity addFriend(@PathVariable Integer id, @PathVariable Integer otherId) {
+        return ResponseEntity.ok(userService.addFriend(id, otherId));
     }
 
     @DeleteMapping("/{id}/friends/{otherId}")
-    public ResponseDefault removeFriend(@PathVariable Integer id, @PathVariable Integer otherId) {
-        return userService.removeFriend(id, otherId);
+    public ResponseEntity removeFriend(@PathVariable Integer id, @PathVariable Integer otherId) {
+        return ResponseEntity.ok(userService.removeFriend(id, otherId));
     }
 }
