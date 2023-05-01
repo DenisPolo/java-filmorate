@@ -1,14 +1,13 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-import ru.yandex.practicum.filmorate.exception.DoesNotExistException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,44 +15,53 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
-    private int id;
     private final Map<Integer, User> users = new HashMap<>();
+    private final UserService userService;
 
     @GetMapping()
     public List<User> getAllUsers() {
-        log.info("Запрос данных всех пользователей");
-        return new ArrayList<>(users.values());
+        return userService.getAllUsers();
+    }
+
+    @GetMapping("/{id}")
+    public User getUserById(@PathVariable Integer id) {
+        return userService.getUserById(id);
     }
 
     @PostMapping()
     public User createUser(@Valid @RequestBody User user) {
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        id++;
-        user.setId(id);
-        users.put(id, user);
-        log.info("Создан пользователь ID: " + user.getId() + ", email: " + user.getEmail() + ", login: " + user.getLogin());
-        return user;
+        return userService.createUser(user);
     }
 
     @PutMapping()
     public User updateUser(@RequestBody User user) {
-        try {
-            if (user.getName() == null || user.getName().isBlank()) {
-                user.setName(user.getLogin());
-            }
-            if (users.containsKey(user.getId())) {
-                users.put(user.getId(), user);
-                log.info("Данные пользователя с ID: " + user.getId() + " обновлены email: " + user.getEmail()
-                        + ", login: " + user.getLogin());
-            } else {
-                throw new DoesNotExistException("Пользователя с ID: " + user.getId() + " не существует");
-            }
-            return user;
-        } catch (DoesNotExistException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
-        }
+        return userService.updateUser(user);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity deleteUser(@PathVariable Integer id) {
+        return ResponseEntity.ok(userService.deleteUser(id));
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<User> getUserFriends(@PathVariable Integer id) {
+        return userService.getUserFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
+        return userService.getCommonFriends(id, otherId);
+    }
+
+    @PutMapping("/{id}/friends/{otherId}")
+    public ResponseEntity addFriend(@PathVariable Integer id, @PathVariable Integer otherId) {
+        return ResponseEntity.ok(userService.addFriend(id, otherId));
+    }
+
+    @DeleteMapping("/{id}/friends/{otherId}")
+    public ResponseEntity removeFriend(@PathVariable Integer id, @PathVariable Integer otherId) {
+        return ResponseEntity.ok(userService.removeFriend(id, otherId));
     }
 }

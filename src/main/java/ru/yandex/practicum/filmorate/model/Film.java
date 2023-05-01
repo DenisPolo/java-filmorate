@@ -8,15 +8,13 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.time.Month;
-import java.time.format.DateTimeFormatter;
+import java.util.Set;
+import java.util.TreeSet;
 
 @Data
 @Builder
 public class Film {
-    public static final LocalDate START_RELEASE_DATE = LocalDate.of(1895, Month.DECEMBER, 28);
-    public static final DateTimeFormatter RELEASE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private int id;
+    private Integer id;
 
     @NotBlank(message = "Имя не должно быть пустым")
     private String name;
@@ -29,4 +27,24 @@ public class Film {
 
     @Positive(message = "Продолжительность фильма не может быть отрицательной")
     private Integer duration;
+
+    private Set<Long> likes;
+
+    public boolean addLike(Integer userId) {
+        if (likes == null) {
+            likes = new TreeSet<>();
+        }
+        return likes.add(userId.longValue());
+    }
+
+    public boolean removeLike(Integer userId) {
+        if (likes == null) {
+            return false;
+        }
+        return likes.remove(userId.longValue());
+    }
+
+    public Integer getLikesAmount() {
+        return (likes == null) ? null : likes.size();
+    }
 }
