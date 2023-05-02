@@ -10,22 +10,22 @@ Template repository for Filmorate project.
 
 ```
 SELECT  f.film_id,
-        f.name,        
-        f.description,        
-        f.release,        
-        f.duration,        
-        g.genre_name AS genre,        
-        r.rating_name AS rating,        
-        l.likes        
+        f.film_name,
+        f.description,
+        f.release,
+        f.duration,
+        COUNT(fg.genre_id) AS amount_genre,
+        r.rating_name AS rating,
+        l.likes
 FROM    (
-        SELECT  film_id,        
-        COUNT(user_id) AS likes        
-        FROM likes        
-        GROUP BY film_id        
-        ORDER BY film_id ASC        
-        ) AS l        
+        SELECT  film_id,
+                COUNT(user_id) AS likes
+        FROM likes
+        GROUP BY film_id
+        ORDER BY film_id ASC
+        ) AS l
 RIGHT OUTER JOIN film AS f ON l.film_id = f.film_id
-LEFT OUTER JOIN genre AS g ON f.genre_id = g.genre_id
+LEFT OUTER JOIN film_genre AS fg ON f.film_id = fg.film_id
 LEFT OUTER JOIN rating AS r ON f.rating_id = r.rating_id
 ORDER BY f.film_id ASC;
 ```
@@ -36,7 +36,7 @@ ORDER BY f.film_id ASC;
 
 ```
 SELECT  f.film_id,
-        f.name,
+        f.film_name,
         f.description,
         f.release,
         f.duration,
@@ -65,7 +65,7 @@ ORDER BY l.likes DESC;
 SELECT  u.user_id,
         u.email,        
         u.login,        
-        u.name,        
+        u.user_name,        
         u.birthday,        
         COUNT(f.friends_id) AS friends        
 FROM user AS u
@@ -84,7 +84,7 @@ ORDER BY u.user_id ASC;
 SELECT  u.user_id,
         u.email,        
         u.login,        
-        u.name,        
+        u.user_name,        
         u.birthday,        
         COUNT(f.friends_id) AS friends        
 FROM (
