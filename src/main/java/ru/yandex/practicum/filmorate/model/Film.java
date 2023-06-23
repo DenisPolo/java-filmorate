@@ -8,7 +8,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Set;
 
 @Data
@@ -30,12 +29,12 @@ public class Film {
 
     private Mpa mpa;
 
-    private List<Genre> genres;
+    private Set<Genre> genres;
 
     private Set<Long> likes;
 
     public Film(Integer id, String name, String description, LocalDate releaseDate, Integer duration, Mpa mpa,
-                List<Genre> genres, Set<Long> likes) {
+                Set<Genre> genres, Set<Long> likes) {
         this.id = id;
         this.name = name;
         this.description = description;

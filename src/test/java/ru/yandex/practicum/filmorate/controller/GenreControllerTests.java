@@ -15,9 +15,9 @@ import ru.yandex.practicum.filmorate.exception.ResponseError;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -28,13 +28,13 @@ import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class GenreControllerTests {
-    URI url;
-    Genre genre1;
-    Genre genre2;
-    Genre genre3;
-    Genre genre4;
-    Genre genre5;
-    Genre genre6;
+    private URI url;
+    private Genre genre1;
+    private Genre genre2;
+    private Genre genre3;
+    private Genre genre4;
+    private Genre genre5;
+    private Genre genre6;
 
     @Value(value = "${local.server.port}")
     private int port;
@@ -79,18 +79,18 @@ public class GenreControllerTests {
 
     @Test
     public void getAllGenres_shouldReturnGenresList_WhenGetAllQuery() {
-        List<Genre> checkGenreList = new ArrayList<>();
+        Set<Genre> checkGenreSet = new HashSet<>();
 
         ResponseEntity<Genre[]> getGenreResponse = restTemplate.getForEntity(url, Genre[].class);
-        List<Genre> genreList = Arrays.asList(getGenreResponse.getBody());
-        checkGenreList.add(genre1);
-        checkGenreList.add(genre2);
-        checkGenreList.add(genre3);
-        checkGenreList.add(genre4);
-        checkGenreList.add(genre5);
-        checkGenreList.add(genre6);
+        Set<Genre> genreSet = new HashSet<>(List.of(getGenreResponse.getBody()));
+        checkGenreSet.add(genre1);
+        checkGenreSet.add(genre2);
+        checkGenreSet.add(genre3);
+        checkGenreSet.add(genre4);
+        checkGenreSet.add(genre5);
+        checkGenreSet.add(genre6);
 
-        assertEquals(checkGenreList, genreList);
+        assertEquals(checkGenreSet, genreSet);
     }
 
     @Test

@@ -33,12 +33,12 @@ import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class UserControllerTests {
-    URI url;
-    User user;
-    User user1;
-    User user2;
-    User user3;
-    User user4;
+    private URI url;
+    private User user;
+    private User user1;
+    private User user2;
+    private User user3;
+    private User user4;
 
     @Value(value = "${local.server.port}")
     private int port;

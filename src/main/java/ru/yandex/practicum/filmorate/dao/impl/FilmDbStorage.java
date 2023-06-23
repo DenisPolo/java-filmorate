@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.dao.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -26,7 +25,6 @@ import java.util.stream.Stream;
 
 @Slf4j
 @Component
-@Qualifier("filmDbStorage")
 public class FilmDbStorage implements FilmStorage {
 
     public final JdbcTemplate jdbcTemplate;
@@ -229,15 +227,17 @@ public class FilmDbStorage implements FilmStorage {
         LocalDate releaseDate = rs.getDate("release").toLocalDate();
         Integer duration = rs.getInt("duration");
         Mpa mpa = new Mpa(Integer.parseInt(rs.getString("mpa_id")), rs.getString("mpa_name"));
-        List<Genre> genres = getGenres(rs.getString("genre_ids"), rs.getString("genre_names"));
+        Set<Genre> genres = getGenres(rs.getString("genre_ids"), rs.getString("genre_names"));
         Set<Long> likes = ((rs.getString("likes") == null)) ? new TreeSet<>() :
                 Stream.of(rs.getString("likes").split(", ")).map(Long::parseLong).collect(Collectors.toSet());
 
         return new Film(id, name, description, releaseDate, duration, mpa, genres, likes);
     }
 
-    private List<Genre> getGenres(String genreIds, String genreNames) {
-        List<Genre> genres = new ArrayList<>();
+    private Set<Genre> getGenres(String genreIds, String genreNames) {
+        Set<Genre> genres = new TreeSet<>(Comparator.comparing(Genre::getId,
+                Comparator.nullsLast(Comparator.naturalOrder())).thenComparing(Genre::getName));
+
         if (genreIds == null || genreNames == null) {
             return genres;
         }
@@ -280,12 +280,9 @@ public class FilmDbStorage implements FilmStorage {
             String sqlQueryUpdateGenres = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
 
             for (Genre genre : film.getGenres()) {
-                if (!jdbcTemplate.queryForRowSet("SELECT film_id FROM film_genres WHERE film_id = ? AND genre_id = ?",
-                        film.getId(), genre.getId()).next()) {
-                    jdbcTemplate.update(sqlQueryUpdateGenres,
-                            film.getId(),
-                            genre.getId());
-                }
+                jdbcTemplate.update(sqlQueryUpdateGenres,
+                        film.getId(),
+                        genre.getId());
             }
         }
     }

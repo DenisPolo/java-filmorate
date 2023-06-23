@@ -34,21 +34,21 @@ import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class FilmControllerTests {
-    Mpa mpa;
-    Genre genre1;
-    Genre genre2;
-    Genre genre3;
-    URI url;
-    Film film;
-    Film film1;
-    Film film2;
-    Film film3;
-    Film film4;
-    User user;
-    User user1;
-    User user2;
-    User user3;
-    User user4;
+    private Mpa mpa;
+    private Genre genre1;
+    private Genre genre2;
+    private Genre genre3;
+    private URI url;
+    private Film film;
+    private Film film1;
+    private Film film2;
+    private Film film3;
+    private Film film4;
+    private User user;
+    private User user1;
+    private User user2;
+    private User user3;
+    private User user4;
 
     @Value(value = "${local.server.port}")
     private int port;
@@ -86,7 +86,7 @@ public class FilmControllerTests {
                 .releaseDate(LocalDate.of(1990, 10, 12))
                 .duration(95)
                 .mpa(mpa)
-                .genres(new ArrayList<>())
+                .genres(new HashSet<>())
                 .likes(new TreeSet<>())
                 .build();
 
@@ -96,7 +96,7 @@ public class FilmControllerTests {
                 .releaseDate(LocalDate.of(1981, 12, 1))
                 .duration(120)
                 .mpa(mpa)
-                .genres(new ArrayList<>())
+                .genres(new HashSet<>())
                 .likes(new TreeSet<>())
                 .build();
 
@@ -106,7 +106,7 @@ public class FilmControllerTests {
                 .releaseDate(LocalDate.of(1979, 6, 15))
                 .duration(84)
                 .mpa(mpa)
-                .genres(new ArrayList<>())
+                .genres(new HashSet<>())
                 .likes(new TreeSet<>())
                 .build();
 
@@ -116,7 +116,7 @@ public class FilmControllerTests {
                 .releaseDate(LocalDate.of(2001, 9, 11))
                 .duration(135)
                 .mpa(mpa)
-                .genres(new ArrayList<>())
+                .genres(new HashSet<>())
                 .likes(new TreeSet<>())
                 .build();
 
@@ -126,7 +126,7 @@ public class FilmControllerTests {
                 .releaseDate(LocalDate.of(2015, 4, 10))
                 .duration(103)
                 .mpa(mpa)
-                .genres(new ArrayList<>())
+                .genres(new HashSet<>())
                 .likes(new TreeSet<>())
                 .build();
 
@@ -436,15 +436,15 @@ public class FilmControllerTests {
 
         assertSame(getFilmById1response.getStatusCode(), HttpStatus.OK);
         assertEquals(getFilmById1response.getBody(), film);
-        assertEquals(getFilmById1response.getBody().getGenres(), new ArrayList<>());
+        assertEquals(getFilmById1response.getBody().getGenres(), new HashSet<>());
     }
 
     @Test
     public void updateGenre_shouldUpdate_whenCorrectObjectsFilmsRequestAndExistingUpdatingId() {
-        List<Genre> checkGenreList = new ArrayList<>();
+        Set<Genre> checkGenreSet = new HashSet<>();
 
         film2.setId(1);
-        film2.setGenres(List.of(genre2, genre3, genre1));
+        film2.setGenres(Set.of(genre2, genre3, genre1));
 
         ResponseEntity<Film> postFilm1Response = restTemplate.postForEntity(url, film1, Film.class);
         film1.setId(1);
@@ -453,16 +453,16 @@ public class FilmControllerTests {
         ResponseEntity<Film[]> getFilmsResponse = restTemplate.getForEntity(url, Film[].class);
         List<Film> filmsList = Arrays.asList(getFilmsResponse.getBody());
 
-        checkGenreList.add(genre2);
-        checkGenreList.add(genre3);
-        checkGenreList.add(genre1);
+        checkGenreSet.add(genre2);
+        checkGenreSet.add(genre3);
+        checkGenreSet.add(genre1);
 
         assertSame(postFilm1Response.getStatusCode(), HttpStatus.OK);
         assertEquals(postFilm1Response.getBody(), film1);
-        assertEquals(postFilm1Response.getBody().getGenres(), new ArrayList<>());
+        assertEquals(postFilm1Response.getBody().getGenres(), new HashSet<>());
         assertSame(putFilm2Response.getStatusCode(), HttpStatus.OK);
         assertEquals(putFilm2Response.getBody(), film2);
         assertEquals(filmsList.get(0), film2);
-        assertEquals(putFilm2Response.getBody().getGenres(), checkGenreList);
+        assertEquals(putFilm2Response.getBody().getGenres(), checkGenreSet);
     }
 }

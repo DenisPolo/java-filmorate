@@ -28,12 +28,12 @@ import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class MpaControllerTests {
-    URI url;
-    Mpa mpa1;
-    Mpa mpa2;
-    Mpa mpa3;
-    Mpa mpa4;
-    Mpa mpa5;
+    private URI url;
+    private Mpa mpa1;
+    private Mpa mpa2;
+    private Mpa mpa3;
+    private Mpa mpa4;
+    private Mpa mpa5;
 
     @Value(value = "${local.server.port}")
     private int port;
