@@ -101,12 +101,12 @@ public class UserDbStorage implements UserStorage {
 
             String sqlQuery = "UPDATE users SET email = ?, login = ?, user_name = ?, birthday = ? WHERE user_id = ?";
 
-            jdbcTemplate.update(sqlQuery
-                    , user.getEmail()
-                    , user.getLogin()
-                    , user.getName()
-                    , user.getBirthday()
-                    , user.getId());
+            jdbcTemplate.update(sqlQuery,
+                    user.getEmail(),
+                    user.getLogin(),
+                    user.getName(),
+                    user.getBirthday(),
+                    user.getId());
 
             return user.getId();
         }
@@ -180,10 +180,10 @@ public class UserDbStorage implements UserStorage {
         if (jdbcTemplate.queryForRowSet(sqlQuery, userId, friendsId).next()) {
             throw new AlreadyExistsException("Пользователи с ID: " + userId + " и ID: " + friendsId + " уже друзья");
         } else if (!jdbcTemplate.queryForRowSet(sqlQuery, friendsId, userId).next()) {
-            boolean updateResult = jdbcTemplate.update(sqlInsert
-                    , userId
-                    , friendsId
-                    , NOT_CONFIRMED_FRIENDSHIP) > 0;
+            boolean updateResult = jdbcTemplate.update(sqlInsert,
+                    userId,
+                    friendsId,
+                    NOT_CONFIRMED_FRIENDSHIP) > 0;
             if (updateResult) {
                 String message = "Пользователь с ID: " + userId + " успешно отправил запрос на добавление в друзья" +
                         " пользователю с ID: " + friendsId + ", их дружба не подтверждена";
@@ -193,15 +193,15 @@ public class UserDbStorage implements UserStorage {
                 throw new AlreadyExistsException("Ошибка при обработке запроса добавления в друзья");
             }
         } else if (jdbcTemplate.update(sqlDelete, friendsId, userId) > 0) {
-            boolean updateResultUser = jdbcTemplate.update(sqlInsert
-                    , userId
-                    , friendsId
-                    , CONFIRMED_FRIENDSHIP) > 0;
+            boolean updateResultUser = jdbcTemplate.update(sqlInsert,
+                    userId,
+                    friendsId,
+                    CONFIRMED_FRIENDSHIP) > 0;
 
-            boolean updateResultFriend = jdbcTemplate.update(sqlInsert
-                    , friendsId
-                    , userId
-                    , CONFIRMED_FRIENDSHIP) > 0;
+            boolean updateResultFriend = jdbcTemplate.update(sqlInsert,
+                    friendsId,
+                    userId,
+                    CONFIRMED_FRIENDSHIP) > 0;
             if (updateResultUser && updateResultFriend) {
                 String message = "Пользователь с ID: " + userId + " успешно добавил в друзья пользователя с ID: "
                         + friendsId + ", теперь их дружба подтверждена";
@@ -244,10 +244,10 @@ public class UserDbStorage implements UserStorage {
         } else if (jdbcTemplate.update(sqlDelete, friendsId, userId) > 0) {
             boolean updateResultUser = jdbcTemplate.update(sqlDelete, userId, friendsId) > 0;
 
-            boolean updateResultFriend = jdbcTemplate.update(sqlInsert
-                    , friendsId
-                    , userId
-                    , NOT_CONFIRMED_FRIENDSHIP) > 0;
+            boolean updateResultFriend = jdbcTemplate.update(sqlInsert,
+                    friendsId,
+                    userId,
+                    NOT_CONFIRMED_FRIENDSHIP) > 0;
             if (updateResultUser && updateResultFriend) {
                 String message = "Пользователь с ID: " + userId + " успешно удалил из друзей пользователя с ID: "
                         + friendsId;
@@ -281,17 +281,17 @@ public class UserDbStorage implements UserStorage {
     }
 
     private void checkUserMailAndLogin(User user) {
-        if ((user.getId() == null && jdbcTemplate.queryForRowSet("SELECT email FROM users WHERE email = ?"
-                , user.getEmail()).next())
-                || jdbcTemplate.queryForRowSet("SELECT email FROM users WHERE email = ? AND NOT user_id = ?"
-                , user.getEmail(), user.getId()).next()) {
+        if ((user.getId() == null && jdbcTemplate.queryForRowSet("SELECT email FROM users WHERE email = ?",
+                user.getEmail()).next())
+                || jdbcTemplate.queryForRowSet("SELECT email FROM users WHERE email = ? AND NOT user_id = ?",
+                user.getEmail(), user.getId()).next()) {
             throw new NotFoundException("Пользователь с email: " + user.getEmail() + " уже существует");
         }
 
-        if ((user.getId() == null && jdbcTemplate.queryForRowSet("SELECT login FROM users WHERE login = ?"
-                , user.getLogin()).next())
-                || jdbcTemplate.queryForRowSet("SELECT login FROM users WHERE login = ? AND NOT user_id = ?"
-                , user.getLogin(), user.getId()).next()) {
+        if ((user.getId() == null && jdbcTemplate.queryForRowSet("SELECT login FROM users WHERE login = ?",
+                user.getLogin()).next())
+                || jdbcTemplate.queryForRowSet("SELECT login FROM users WHERE login = ? AND NOT user_id = ?",
+                user.getLogin(), user.getId()).next()) {
             throw new NotFoundException("Пользователь с login: " + user.getLogin() + " уже существует");
         }
     }

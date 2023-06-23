@@ -129,13 +129,13 @@ public class FilmDbStorage implements FilmStorage {
             String sqlQuery = "UPDATE films SET film_name = ?, description = ?, release = ?, duration = ?, " +
                     "mpa_id = ? WHERE film_id = ?";
 
-            jdbcTemplate.update(sqlQuery
-                    , film.getName()
-                    , film.getDescription()
-                    , film.getReleaseDate()
-                    , film.getDuration()
-                    , (film.getMpa() == null) ? 1 : film.getMpa().getId()
-                    , film.getId());
+            jdbcTemplate.update(sqlQuery,
+                    film.getName(),
+                    film.getDescription(),
+                    film.getReleaseDate(),
+                    film.getDuration(),
+                    (film.getMpa() == null) ? 1 : film.getMpa().getId(),
+                    film.getId());
 
             updateGenre(film);
 
@@ -155,8 +155,8 @@ public class FilmDbStorage implements FilmStorage {
         checkFilmExists(filmId);
         checkUserExists(userId);
 
-        if (jdbcTemplate.queryForRowSet("SELECT film_id FROM likes WHERE film_id = ? AND user_id = ?"
-                , filmId, userId).next()) {
+        if (jdbcTemplate.queryForRowSet("SELECT film_id FROM likes WHERE film_id = ? AND user_id = ?",
+                filmId, userId).next()) {
             throw new AlreadyExistsException("Пользователь с ID: " + userId + " уже поставил like фильму "
                     + getFilm(filmId).getName() + " с ID: " + filmId);
         } else if (jdbcTemplate.update("INSERT INTO likes (film_id, user_id, last_update) " +
@@ -175,8 +175,8 @@ public class FilmDbStorage implements FilmStorage {
         checkFilmExists(filmId);
         checkUserExists(userId);
 
-        if (!jdbcTemplate.queryForRowSet("SELECT film_id, user_id FROM likes WHERE film_id = ? AND user_id = ?"
-                , filmId, userId).next()) {
+        if (!jdbcTemplate.queryForRowSet("SELECT film_id, user_id FROM likes WHERE film_id = ? AND user_id = ?",
+                filmId, userId).next()) {
             throw new NotFoundException("Пользователь с ID: " + userId + " не ставил like фильму "
                     + getFilm(filmId).getName() + " с ID: " + filmId);
         } else if (jdbcTemplate.update("DELETE FROM likes WHERE film_id = ? AND user_id = ?", filmId, userId) > 0) {
@@ -282,9 +282,9 @@ public class FilmDbStorage implements FilmStorage {
             for (Genre genre : film.getGenres()) {
                 if (!jdbcTemplate.queryForRowSet("SELECT film_id FROM film_genres WHERE film_id = ? AND genre_id = ?",
                         film.getId(), genre.getId()).next()) {
-                    jdbcTemplate.update(sqlQueryUpdateGenres
-                            , film.getId()
-                            , genre.getId());
+                    jdbcTemplate.update(sqlQueryUpdateGenres,
+                            film.getId(),
+                            genre.getId());
                 }
             }
         }
