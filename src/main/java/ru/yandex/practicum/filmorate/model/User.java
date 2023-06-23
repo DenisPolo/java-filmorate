@@ -9,7 +9,6 @@ import javax.validation.constraints.Past;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
 import java.util.Set;
-import java.util.TreeSet;
 
 @Data
 @Builder
@@ -31,17 +30,12 @@ public class User {
 
     private Set<Long> friends;
 
-    public boolean addFriend(Integer friendsId) {
-        if (friends == null) {
-            friends = new TreeSet<>();
-        }
-        return friends.add(friendsId.longValue());
-    }
-
-    public boolean removeFriend(Integer friendsId) {
-        if (friends == null) {
-            return false;
-        }
-        return friends.remove(friendsId.longValue());
+    public User(Integer id, String email, String login, String name, LocalDate birthday, Set<Long> friends) {
+        this.id = id;
+        this.email = email;
+        this.login = login;
+        this.name = name;
+        this.birthday = birthday;
+        this.friends = friends;
     }
 }

@@ -1,9 +1,11 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
@@ -19,12 +21,15 @@ import java.net.URI;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TreeSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 
+@AutoConfigureTestDatabase
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class UserControllerTests {
@@ -50,6 +55,7 @@ public class UserControllerTests {
                 .login("userLogin")
                 .name("UserName")
                 .birthday(LocalDate.of(2005, 1, 22))
+                .friends(new TreeSet<>())
                 .build();
 
         user1 = User.builder()
@@ -57,6 +63,7 @@ public class UserControllerTests {
                 .login("user1Login")
                 .name("User1Name")
                 .birthday(LocalDate.of(1990, 10, 12))
+                .friends(new TreeSet<>())
                 .build();
 
         user2 = User.builder()
@@ -64,6 +71,7 @@ public class UserControllerTests {
                 .login("user2Login")
                 .name("User2Name")
                 .birthday(LocalDate.of(1984, 11, 10))
+                .friends(new TreeSet<>())
                 .build();
 
         user3 = User.builder()
@@ -71,6 +79,7 @@ public class UserControllerTests {
                 .login("user3Login")
                 .name("User3Name")
                 .birthday(LocalDate.of(1986, 5, 12))
+                .friends(new TreeSet<>())
                 .build();
 
         user4 = User.builder()
@@ -78,6 +87,7 @@ public class UserControllerTests {
                 .login("user4Login")
                 .name("User4Name")
                 .birthday(LocalDate.of(1998, 1, 5))
+                .friends(new TreeSet<>())
                 .build();
     }
 
@@ -96,11 +106,10 @@ public class UserControllerTests {
 
     @Test
     public void createUser_shouldCreateTwoFilms_whenCorrectObjectsUsersRequest() {
-        user1.setId(1);
-        user2.setId(2);
-
         assertThat(this.restTemplate.postForObject(url, user1, User.class).equals(user1));
         assertThat(this.restTemplate.postForObject(url, user2, User.class).equals(user2));
+        user1.setId(1);
+        user2.setId(2);
         ResponseEntity<User[]> getUsersResponse = restTemplate.getForEntity(url, User[].class);
         List<User> usersList = Arrays.asList(getUsersResponse.getBody());
 
@@ -198,10 +207,9 @@ public class UserControllerTests {
 
     @Test
     public void updateUser_shouldReturnNotFound_whenUpdatingIdDoesNotExist() {
+        restTemplate.postForLocation(url, user1);
         user1.setId(1);
         user2.setId(2);
-
-        restTemplate.postForLocation(url, user1);
         ResponseEntity<ResponseError> putUser2response = restTemplate.exchange(url, HttpMethod.PUT,
                 new HttpEntity<>(user2), ResponseError.class);
         ResponseEntity<User[]> getUsersResponse = restTemplate.getForEntity(url, User[].class);
@@ -223,9 +231,8 @@ public class UserControllerTests {
 
     @Test
     public void getUserById_shouldReturnUserWithId1_whenUserWithIdExists() {
-        user.setId(1);
-
         restTemplate.postForLocation(url, user);
+        user.setId(1);
         ResponseEntity<User> getUserById1response = restTemplate.getForEntity(url.resolve("/users/1"), User.class);
 
         assertSame(getUserById1response.getStatusCode(), HttpStatus.OK);
@@ -243,9 +250,8 @@ public class UserControllerTests {
 
     @Test
     public void deleteUser_shouldDeleteUserWithId1_whenUserWithIdExists() {
-        user.setId(1);
         restTemplate.postForLocation(url, user);
-
+        user.setId(1);
         ResponseEntity<User> getUserById1response1 = restTemplate.getForEntity(url.resolve("/users/1"), User.class);
         ResponseEntity<ResponseDefault> deleteUserById1response = restTemplate.exchange(url.resolve("/users/1"),
                 HttpMethod.DELETE, new HttpEntity<>(null), ResponseDefault.class);
@@ -353,7 +359,8 @@ public class UserControllerTests {
 
         assertSame(putUser1Friend2Response.getStatusCode(), HttpStatus.OK);
         assertEquals(putUser1Friend2Response.getBody().getMessage(),
-                "Пользователи с ID: 1 и ID: 2 успешно добавлены в друзья");
+                "Пользователь с ID: 1 успешно отправил запрос на добавление в друзья пользователю с ID: 2, " +
+                        "их дружба не подтверждена");
     }
 
     @Test
@@ -371,7 +378,7 @@ public class UserControllerTests {
     }
 
     @Test
-    public void deleteFriend_shouldReturnInternalServerError_whenUsersAreNotFriends() {
+    public void deleteFriend_shouldReturnNotFound_whenUsersAreNotFriends() {
         restTemplate.postForLocation(url, user1);
         restTemplate.postForLocation(url, user2);
 
@@ -379,7 +386,7 @@ public class UserControllerTests {
                 restTemplate.exchange(url.resolve("/users/1/friends/2"), HttpMethod.DELETE, new HttpEntity<>(null),
                         ResponseError.class);
 
-        assertSame(deleteUser1Friend2Response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+        assertSame(deleteUser1Friend2Response.getStatusCode(), HttpStatus.NOT_FOUND);
         assertEquals(deleteUser1Friend2Response.getBody().getMessage(),
                 "Пользователи с ID: 1 и ID: 2 не являются друзьями");
     }
@@ -396,6 +403,6 @@ public class UserControllerTests {
 
         assertSame(deleteUser1Friend2Response.getStatusCode(), HttpStatus.OK);
         assertEquals(deleteUser1Friend2Response.getBody().getMessage(),
-                "Пользователи с ID: 1 и ID: 2 больше не друзья :(");
+                "Пользователь с ID: 1 успешно отозвал запрос на добавление в друзья пользователю с ID: 2");
     }
 }

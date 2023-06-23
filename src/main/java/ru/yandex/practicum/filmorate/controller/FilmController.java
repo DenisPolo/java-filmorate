@@ -5,9 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
+import java.sql.SQLException;
 import java.util.List;
 
 @Slf4j
@@ -56,4 +58,14 @@ public class FilmController {
     public List<Film> getPopular(@RequestParam(defaultValue = "10", required = false) Integer count) {
         return filmService.getPopular(count);
     }
+
+/*    @GetMapping("/mpa")
+    public List<Mpa> getAllMpa() {
+        return filmService.getAllMpa();
+    }
+
+    @GetMapping("/mpa/{id}")
+    public Mpa getMpa(@PathVariable Integer id) {
+        return filmService.getMpa(id);
+    }*/
 }
