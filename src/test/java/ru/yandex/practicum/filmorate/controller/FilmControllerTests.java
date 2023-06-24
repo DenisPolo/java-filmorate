@@ -1,9 +1,11 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
@@ -13,35 +15,40 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.exception.ResponseError;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.ResponseDefault;
 
 import java.net.URI;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 
+@AutoConfigureTestDatabase
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class FilmControllerTests {
-    URI url;
-    Film film;
-    Film film1;
-    Film film2;
-    Film film3;
-    Film film4;
-    User user;
-    User user1;
-    User user2;
-    User user3;
-    User user4;
+    private Mpa mpa;
+    private Genre genre1;
+    private Genre genre2;
+    private Genre genre3;
+    private URI url;
+    private Film film;
+    private Film film1;
+    private Film film2;
+    private Film film3;
+    private Film film4;
+    private User user;
+    private User user1;
+    private User user2;
+    private User user3;
+    private User user4;
 
     @Value(value = "${local.server.port}")
     private int port;
@@ -53,11 +60,34 @@ public class FilmControllerTests {
     public void beforeEach() {
         url = URI.create("http://localhost:" + port + "/films");
 
+        mpa = Mpa.builder()
+                .id(1)
+                .name("G")
+                .build();
+
+        genre1 = Genre.builder()
+                .id(1)
+                .name("Комедия")
+                .build();
+
+        genre2 = Genre.builder()
+                .id(2)
+                .name("Драма")
+                .build();
+
+        genre3 = Genre.builder()
+                .id(3)
+                .name("Мультфильм")
+                .build();
+
         film = Film.builder()
                 .name("FilmName")
                 .description("Any film description")
                 .releaseDate(LocalDate.of(1990, 10, 12))
                 .duration(95)
+                .mpa(mpa)
+                .genres(new HashSet<>())
+                .likes(new TreeSet<>())
                 .build();
 
         film1 = Film.builder()
@@ -65,6 +95,9 @@ public class FilmControllerTests {
                 .description("Any film1 description")
                 .releaseDate(LocalDate.of(1981, 12, 1))
                 .duration(120)
+                .mpa(mpa)
+                .genres(new HashSet<>())
+                .likes(new TreeSet<>())
                 .build();
 
         film2 = Film.builder()
@@ -72,6 +105,9 @@ public class FilmControllerTests {
                 .description("Any film2 description")
                 .releaseDate(LocalDate.of(1979, 6, 15))
                 .duration(84)
+                .mpa(mpa)
+                .genres(new HashSet<>())
+                .likes(new TreeSet<>())
                 .build();
 
         film3 = Film.builder()
@@ -79,6 +115,9 @@ public class FilmControllerTests {
                 .description("Any film3 description")
                 .releaseDate(LocalDate.of(2001, 9, 11))
                 .duration(135)
+                .mpa(mpa)
+                .genres(new HashSet<>())
+                .likes(new TreeSet<>())
                 .build();
 
         film4 = Film.builder()
@@ -86,6 +125,9 @@ public class FilmControllerTests {
                 .description("Any film4 description")
                 .releaseDate(LocalDate.of(2015, 4, 10))
                 .duration(103)
+                .mpa(mpa)
+                .genres(new HashSet<>())
+                .likes(new TreeSet<>())
                 .build();
 
         user = User.builder()
@@ -125,12 +167,12 @@ public class FilmControllerTests {
     }
 
     @Test
-    public void getAllFilms_shouldReturnEmptyList_whenNoAnyFilms() throws Exception {
+    public void getAllFilms_shouldReturnEmptyList_whenNoAnyFilms() {
         assertThat(this.restTemplate.getForObject(url, String.class)).contains("[]");
     }
 
     @Test
-    public void addFilm_shouldAddNewFilmWhithId1AndReturnObjectFilm_whenCorrectObjectFilmRequest() throws Exception {
+    public void addFilm_shouldAddNewFilmWhithId1AndReturnObjectFilm_whenCorrectObjectFilmRequest() {
         ResponseEntity<Film> postFilmResponse = restTemplate.postForEntity(url, film, Film.class);
 
         assertEquals(postFilmResponse.getBody().getId(), 1);
@@ -144,12 +186,13 @@ public class FilmControllerTests {
     }
 
     @Test
-    public void addFilm_shouldAddTwoFilms_whenCorrectObjectsFilmsRequest() throws Exception {
+    public void addFilm_shouldAddTwoFilms_whenCorrectObjectsFilmsRequest() {
+        assertThat(this.restTemplate.postForObject(url, film1, Film.class).equals(film1));
+        assertThat(this.restTemplate.postForObject(url, film2, Film.class).equals(film2));
+
         film1.setId(1);
         film2.setId(2);
 
-        assertThat(this.restTemplate.postForObject(url, film1, Film.class).equals(film1));
-        assertThat(this.restTemplate.postForObject(url, film2, Film.class).equals(film2));
         ResponseEntity<Film[]> getFilmsResponse = restTemplate.getForEntity(url, Film[].class);
         List<Film> filmsList = Arrays.asList(getFilmsResponse.getBody());
 
@@ -158,7 +201,7 @@ public class FilmControllerTests {
     }
 
     @Test
-    public void addFilm_shouldReturnBadRequest_whenFilmsNaimIsEmptyOrNull() throws Exception {
+    public void addFilm_shouldReturnBadRequest_whenFilmsNaimIsEmptyOrNull() {
         film1.setName("");
         film2.setName(null);
 
@@ -172,7 +215,7 @@ public class FilmControllerTests {
     }
 
     @Test
-    public void addFilm_shouldReturnBadRequest_whenFilmsDescriptionMoreThan200Symbols() throws Exception {
+    public void addFilm_shouldReturnBadRequest_whenFilmsDescriptionMoreThan200Symbols() {
         //description contains 201 symbol
         film.setDescription("01234567890123456789012345678901234567890123456789" +
                 "01234567890123456789012345678901234567890123456789" +
@@ -186,7 +229,7 @@ public class FilmControllerTests {
     }
 
     @Test
-    public void addFilm_shouldReturnBadRequest_whenFilmsRelease1895December28OrEarlier() throws Exception {
+    public void addFilm_shouldReturnBadRequest_whenFilmsRelease1895December28OrEarlier() {
         film.setReleaseDate(LocalDate.of(1895, 12, 28));
 
         ResponseEntity<ResponseError> postFilm1Response = restTemplate.postForEntity(url, film, ResponseError.class);
@@ -196,7 +239,7 @@ public class FilmControllerTests {
     }
 
     @Test
-    public void addFilm_shouldReturnBadRequest_whenNegativeFilmsDuration() throws Exception {
+    public void addFilm_shouldReturnBadRequest_whenNegativeFilmsDuration() {
         film.setDuration(-95);
 
         ResponseEntity<ResponseError> postFilm1Response = restTemplate.postForEntity(url, film,
@@ -207,7 +250,7 @@ public class FilmControllerTests {
     }
 
     @Test
-    public void updateFilm_shouldUpdate_whenCorrectObjectsFilmsRequestAndExistingUpdatingId() throws Exception {
+    public void updateFilm_shouldUpdate_whenCorrectObjectsFilmsRequestAndExistingUpdatingId() {
         film2.setId(1);
 
         restTemplate.postForLocation(url, film1);
@@ -226,11 +269,10 @@ public class FilmControllerTests {
     }
 
     @Test
-    public void updateFilm_shouldReturnNotFound_whenUpdatingIdDoesNotExist() throws Exception {
+    public void updateFilm_shouldReturnNotFound_whenUpdatingIdDoesNotExist() {
+        restTemplate.postForLocation(url, film1);
         film1.setId(1);
         film2.setId(2);
-
-        restTemplate.postForLocation(url, film1);
         ResponseEntity<ResponseError> putFilm2Response = restTemplate.exchange(url, HttpMethod.PUT,
                 new HttpEntity<>(film2), ResponseError.class);
         ResponseEntity<Film[]> getFilmsResponse = restTemplate.getForEntity(url, Film[].class);
@@ -252,9 +294,8 @@ public class FilmControllerTests {
 
     @Test
     public void getFilm_shouldReturnFilmWithId1_whenFilmWithIdExists() {
-        film.setId(1);
-
         restTemplate.postForLocation(url, film);
+        film.setId(1);
         ResponseEntity<Film> getFilmById1response = restTemplate.getForEntity(url.resolve("/films/1"), Film.class);
 
         assertSame(getFilmById1response.getStatusCode(), HttpStatus.OK);
@@ -272,9 +313,8 @@ public class FilmControllerTests {
 
     @Test
     public void deleteFilm_shouldDeleteFilmWithId1_whenFilmWithIdExists() {
-        film.setId(1);
         restTemplate.postForLocation(url, film);
-
+        film.setId(1);
         ResponseEntity<Film> getFilmById1Response1 = restTemplate.getForEntity(url.resolve("/films/1"), Film.class);
         ResponseEntity<ResponseDefault> deleteFilmById1Response = restTemplate.exchange(url.resolve("/films/1"),
                 HttpMethod.DELETE, new HttpEntity<>(null), ResponseDefault.class);
@@ -335,7 +375,7 @@ public class FilmControllerTests {
         ResponseEntity<ResponseError> removeLike = restTemplate.exchange(url.resolve("/films/1/like/1"),
                 HttpMethod.DELETE, new HttpEntity<>(null), ResponseError.class);
 
-        assertSame(removeLike.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+        assertSame(removeLike.getStatusCode(), HttpStatus.NOT_FOUND);
         assertEquals(removeLike.getBody().getMessage(), "Пользователь с ID: 1 не ставил like фильму FilmName с ID: 1");
     }
 
@@ -373,5 +413,56 @@ public class FilmControllerTests {
 
         assertSame(getPopular.getStatusCode(), HttpStatus.OK);
         assertEquals(popularList, checkingList);
+    }
+
+    @Test
+    public void getFilm_shouldReturnFilmWithMpa1AsG_whenFilmWithIdExistsWithMpa1() {
+        restTemplate.postForLocation(url, film);
+        film.setId(1);
+        ResponseEntity<Film> getFilmById1response = restTemplate.getForEntity(url.resolve("/films/1"), Film.class);
+
+        assertSame(getFilmById1response.getStatusCode(), HttpStatus.OK);
+        assertEquals(getFilmById1response.getBody(), film);
+        assertEquals(getFilmById1response.getBody().getMpa(), mpa);
+        assertEquals(getFilmById1response.getBody().getMpa().getId(), 1);
+        assertEquals(getFilmById1response.getBody().getMpa().getName(), "G");
+    }
+
+    @Test
+    public void getFilmGenre_shouldReturnEmptyList_whenNoGenre() {
+        restTemplate.postForLocation(url, film);
+        film.setId(1);
+        ResponseEntity<Film> getFilmById1response = restTemplate.getForEntity(url.resolve("/films/1"), Film.class);
+
+        assertSame(getFilmById1response.getStatusCode(), HttpStatus.OK);
+        assertEquals(getFilmById1response.getBody(), film);
+        assertEquals(getFilmById1response.getBody().getGenres(), new HashSet<>());
+    }
+
+    @Test
+    public void updateGenre_shouldUpdate_whenCorrectObjectsFilmsRequestAndExistingUpdatingId() {
+        Set<Genre> checkGenreSet = new HashSet<>();
+
+        film2.setId(1);
+        film2.setGenres(Set.of(genre2, genre3, genre1));
+
+        ResponseEntity<Film> postFilm1Response = restTemplate.postForEntity(url, film1, Film.class);
+        film1.setId(1);
+        ResponseEntity<Film> putFilm2Response = restTemplate.exchange(url, HttpMethod.PUT,
+                new HttpEntity<>(film2), Film.class);
+        ResponseEntity<Film[]> getFilmsResponse = restTemplate.getForEntity(url, Film[].class);
+        List<Film> filmsList = Arrays.asList(getFilmsResponse.getBody());
+
+        checkGenreSet.add(genre2);
+        checkGenreSet.add(genre3);
+        checkGenreSet.add(genre1);
+
+        assertSame(postFilm1Response.getStatusCode(), HttpStatus.OK);
+        assertEquals(postFilm1Response.getBody(), film1);
+        assertEquals(postFilm1Response.getBody().getGenres(), new HashSet<>());
+        assertSame(putFilm2Response.getStatusCode(), HttpStatus.OK);
+        assertEquals(putFilm2Response.getBody(), film2);
+        assertEquals(filmsList.get(0), film2);
+        assertEquals(putFilm2Response.getBody().getGenres(), checkGenreSet);
     }
 }
