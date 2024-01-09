@@ -125,7 +125,7 @@ WHERE u.user_id = 1
 GROUP BY u.user_id;
 ```
 
-## Получение друзей пользователz с ID 1:
+## Получение друзей пользователя с ID 1:
 
 ```
 SELECT  u.user_id,
