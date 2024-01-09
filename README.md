@@ -1,5 +1,5 @@
 # java-filmorate
-Template repository for Filmorate project.
+Бэкенд приложения для работы с рейтингами фильмов на основе оценок пользователей для выбора наиболее популярных
 
 # Схема базы данных
 ![](https://github.com/DenisPolo/java-filmorate/blob/main/database_schema.svg)
